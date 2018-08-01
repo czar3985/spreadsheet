@@ -105,4 +105,5 @@ tr {
 .row-number-section {
   top: 112px;
   position: fixed;
+  z-index: 1;
 }
