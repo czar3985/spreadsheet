@@ -51,12 +51,14 @@ $('.row-numbers').append(fragment);
 
 /* Add cells */
 fragment = document.createDocumentFragment();
+i = 1;
 for (var row = 1; row <= numRows; row++) {
 
     var newRow = document.createElement('tr');
 
     for (var col = 1; col <= numCols; col++) {
-        $(newRow).append('<td><input type="text"></td>');
+        $(newRow).append('<td><input type="text" data-index="' + i.toString() + '"></td>');
+        i++;
     }
     $(fragment).append(newRow);
 }
@@ -86,4 +88,9 @@ $('input').keydown(function (e) {
 
     else if ((e.key == 'u') && (e.ctrlKey == true))
         $(this).toggleClass('underline');
+});
+
+/* Get and save input */
+$('input').blur(function (e) {
+    alert($(this).val());
 });
