@@ -94,6 +94,15 @@ td, th {
   width: 68px;
 }
 
+th {
+  border-left: none;
+}
+
+td {
+  border-top: none;
+  border-left: none;
+}
+
 tr {
   height: 22px;
 }
@@ -109,8 +118,12 @@ tr {
 }
 
 input {
-  width: 68px;
+  width: 65px;
   padding: 0px;
   margin: 0px;
   border: none;
+}
+
+.cells {
+  padding-top: 17px;
 }
