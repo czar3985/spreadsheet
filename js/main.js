@@ -84,13 +84,13 @@ $(window).scroll(function () {
 /* Cell formatting */
 $('input').keydown(function (e) {
 
-    if ((e.key == 'b') && (e.ctrlKey == true))
+    if ((e.key === 'b') && (e.ctrlKey === true))
         $(this).toggleClass('bold');
 
-    else if ((e.key == 'i') && (e.ctrlKey == true))
+    else if ((e.key === 'i') && (e.ctrlKey === true))
         $(this).toggleClass('italic');
 
-    else if ((e.key == 'u') && (e.ctrlKey == true))
+    else if ((e.key === 'u') && (e.ctrlKey === true))
         $(this).toggleClass('underline');
 });
 
@@ -120,8 +120,10 @@ $('input').blur(function (e) {
             if (!(input.includes('*')) &&
                 !(input.includes('/')) &&
                 !(input.includes('+')) &&
-                !(input.includes('-')))
+                !(input.includes('-'))) {
+                /* TODO: Add checking for valid numbers e.g., "= 6 " */
                 return;
+            }
 
             /* Consider MDAS rule */
             var arr = input.split(/\*\//);
