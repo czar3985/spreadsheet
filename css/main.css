@@ -1,0 +1,110 @@
+/*
+ *
+ * Common
+ *
+ *
+*/
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font: 14px Roboto, Raleway;
+  margin: 0;
+}
+
+.container {
+  width: 100%;
+  height: 100%;
+  min-width: 1000px;
+}
+
+main {
+  padding-top: 40px;
+}
+
+/*
+ *
+ * Header
+ *
+ *
+*/
+
+header {
+  position: fixed;
+  background: white;
+  width: 100%;
+  height: 40px;
+  z-index: 10;
+}
+
+.header-inner {
+  height: 40px;
+  margin: 10px;
+}
+
+.header-logo {
+  height: 100%;
+  float: left;
+}
+
+.header-name {
+  padding-left: 1em;
+  float: left;
+  text-align: left;
+  margin: 0;
+  font-size: 2.25em;
+  color: steelblue;
+}
+
+hr {
+  border-width: 1.5px;
+  border-style: solid;
+  padding-top: 42px;
+}
+
+/*
+ *
+ * Table
+ *
+ *
+*/
+
+.worksheet {
+  padding-top: 5px; /* col header row */
+  padding-left: 30px; /* row number col */
+}
+
+table {
+  table-layout: fixed; /* keep the cell widths the same */
+  border-spacing: 0px;
+}
+
+.column-header {
+  width: 100%;
+  left: 0px;
+  position: fixed;
+  z-index: 8;
+  background-color: white;
+}
+
+td, th {
+  border: lightgrey;
+  border-style: solid;
+  border-width: 0.5px;
+  width: 68px;
+}
+
+tr {
+  height: 22px;
+}
+
+.row-width {
+  width: 30px;
+}
+
+.row-number-section {
+  top: 62px;
+  position: fixed;
+}
