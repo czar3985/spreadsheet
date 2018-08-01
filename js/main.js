@@ -13,8 +13,10 @@ const numCols = 100;
 /* ISSUE: Only goes up to ZZ */
 var code1 = 0;
 var code2 = 65;
-var node;
-for (var i = 1; i <= numCols; i++) {
+var i, node;
+/* Use a fragment to avoid numerous reflows */
+const letfragment = document.createDocumentFragment();
+for (i = 1; i <= numCols; i++) {
     if (code1 === 0) { /* Single letter columns */
         node = $('<th>' + String.fromCharCode(code2) + '</th>');
         if (code2 === 90) { /* At Z, move to AA */
@@ -35,13 +37,23 @@ for (var i = 1; i <= numCols; i++) {
             code2++;
         }
     }
-    $('.column-header-row').append(node);
+    $(letfragment).append(node);
 }
+$('.column-header-row').append(letfragment);
 
 /* Add row numbers */
-for (var i = 1; i <= numRows; i++) {
+const numfragment = document.createDocumentFragment();
+for (i = 1; i <= numRows; i++) {
     node = $('<tr><td class="row-width">' + i.toString() + '</td></tr>');
-    $('.row-numbers').append(node);
+    $(numfragment).append(node);
+}
+$('.row-numbers').append(numfragment);
+
+/* Add cells */
+for (var row = 1; row <= numRows; row++) {
+    for (var col = 1; col <= numCols; col++) {
+
+    }
 }
 
 /*
