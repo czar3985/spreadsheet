@@ -100,15 +100,35 @@ $('input').blur(function (e) {
     if ($(this).val() === '')
         return;
 
-    dictInput[$(this).data('index')] = $(this).val();
+    var input = $(this).val();
+    dictInput[$(this).data('index')] = input;
 
     /* Check the input */
-    if (!isNaN($(this).val())) {
+    if (!isNaN(input)) {
         /* Value is a number -> Save */
         /* TODO: Comma-separated numbers are not yet recognized as numbers */
-        dictValue[$(this).data('index')] = $(this).val();
+        dictValue[$(this).data('index')] = input;
     }
+    else {
+        /* Check if valid formula */
+        if (input.charAt(0) === '=') {
+            input = input.slice(1)/*.replace(/\s+/g, '')*/;/* Remove '=' */
+            if (input === '')
+                return
 
-    console.log(dictInput);
-    console.log(dictValue);
+            /* Check for operators */
+            if (!(input.includes('*')) &&
+                !(input.includes('/')) &&
+                !(input.includes('+')) &&
+                !(input.includes('-')))
+                return;
+
+            /* Consider MDAS rule */
+            var arr = input.split(/\*\//);
+            if (arr.length === 0)
+                return
+
+            console.log(arr);
+        }
+    }
 });
