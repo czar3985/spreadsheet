@@ -74,3 +74,16 @@ $(window).scroll(function () {
     $('.column-header').css('left', (-window.pageXOffset).toString() + 'px');
     $('.row-number-section').css('top', (112 - window.pageYOffset).toString() + 'px');
 });
+
+/* Cell formatting */
+$('input').keydown(function (e) {
+
+    if ((e.key == 'b') && (e.ctrlKey == true))
+        $(this).toggleClass('bold');
+
+    else if ((e.key == 'i') && (e.ctrlKey == true))
+        $(this).toggleClass('italic');
+
+    else if ((e.key == 'u') && (e.ctrlKey == true))
+        $(this).toggleClass('underline');
+});
