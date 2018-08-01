@@ -54,5 +54,5 @@ for (var i = 1; i <= numRows; i++) {
 /* Allow the column header and row number column to scroll accordingly */
 $(window).scroll(function () {
     $('.column-header').css('left', (-window.pageXOffset).toString() + 'px');
-    $('.row-number-section').css('top', (202-window.pageYOffset).toString() + 'px');
+    $('.row-number-section').css('top', (82 - window.pageYOffset).toString() + 'px');
 });
