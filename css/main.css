@@ -107,3 +107,10 @@ tr {
   position: fixed;
   z-index: 1;
 }
+
+input {
+  width: 68px;
+  padding: 0px;
+  margin: 0px;
+  border: none;
+}

@@ -15,7 +15,7 @@ var code1 = 0;
 var code2 = 65;
 var i, node;
 /* Use a fragment to avoid numerous reflows */
-const letFragment = document.createDocumentFragment();
+var fragment = document.createDocumentFragment();
 for (i = 1; i <= numCols; i++) {
     if (code1 === 0) { /* Single letter columns */
         node = $('<th>' + String.fromCharCode(code2) + '</th>');
@@ -37,28 +37,30 @@ for (i = 1; i <= numCols; i++) {
             code2++;
         }
     }
-    $(letFragment).append(node);
+    $(fragment).append(node);
 }
-$('.column-header-row').append(letFragment);
+$('.column-header-row').append(fragment);
 
 /* Add row numbers */
-const numFragment = document.createDocumentFragment();
+fragment = document.createDocumentFragment();
 for (i = 1; i <= numRows; i++) {
     node = $('<tr><td class="row-width">' + i.toString() + '</td></tr>');
-    $(numFragment).append(node);
+    $(fragment).append(node);
 }
-$('.row-numbers').append(numFragment);
+$('.row-numbers').append(fragment);
 
 /* Add cells */
-const cellFragment = document.createDocumentFragment();
+fragment = document.createDocumentFragment();
 for (var row = 1; row <= numRows; row++) {
-    $(cellFragment).append('<tr>');
+
+    var newRow = document.createElement('tr');
+
     for (var col = 1; col <= numCols; col++) {
-        $(cellFragment).append('<td><input type="text"></td>');
+        $(newRow).append('<td><input type="text"></td>');
     }
-    $(cellFragment).append('</tr>');
+    $(fragment).append(newRow);
 }
-$('.cells').append(cellFragment);
+$('.cells').append(fragment);
 
 /*
  *
