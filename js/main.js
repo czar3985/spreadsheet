@@ -5,6 +5,10 @@
  *
 */
 
+/* Global Objects */
+var dictInput = {}; /* User input per cell */
+var dictValue = {}; /* Calculated value per cell */
+
 /* ISSUE: numCols can only go up to 702 */
 const numRows = 100;
 const numCols = 100;
@@ -92,5 +96,19 @@ $('input').keydown(function (e) {
 
 /* Get and save input */
 $('input').blur(function (e) {
-    alert($(this).val());
+    /* Save input string, number or formula if cell isn't blank after losing focus */
+    if ($(this).val() === '')
+        return;
+
+    dictInput[$(this).data('index')] = $(this).val();
+
+    /* Check the input */
+    if (!isNaN($(this).val())) {
+        /* Value is a number -> Save */
+        /* TODO: Comma-separated numbers are not yet recognized as numbers */
+        dictValue[$(this).data('index')] = $(this).val();
+    }
+
+    console.log(dictInput);
+    console.log(dictValue);
 });
