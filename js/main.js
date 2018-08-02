@@ -177,6 +177,55 @@ function parseFormula(input) {
     return arrClean;
 }
 
+function multiplyDivide(arr) {
+    var arrEq = [];
+    var i;
+    var justPush = false;
+
+    var found = arr.find(function (element) {
+        return (element === '*' || element === '/');
+    });
+    if (!found)
+        return arr;
+
+    for (i = 0; i < arr.length; i++) {
+        if ((arr[i + 1] !== '*') && (arr[i + 1] !== '/') && justPush) {
+            arrEq.push(arr[i]);
+            continue;
+        }
+        else {
+            var num;
+            if (arr[i + 1] === '*')
+                num = arr[i] * arr[i + 2];
+            else
+                num = arr[i] / arr[i + 2];
+            arrEq.push(num);
+            i += 2;
+            justPush == true;
+        }
+    }
+
+    if (arrEq.Length !== 1)
+        return multiplyDivide(arrEq);
+    else
+        return arrEq;
+}
+
+function addSubtract(arr) {
+    var answer;
+
+    for (var i = 0; i < arr.length; i+=2) {
+        if (arr[i + 1] === '+') {
+            answer = arr[i] + arr[i + 2];
+        }
+        else {
+            answer = arr[i] - arr[i + 2];
+        }
+    }
+
+    return answer;
+}
+
 /* Get and save input */
 $('input').blur(function (e) {
     /* Save input string, number or formula if cell isn't blank after losing focus */
@@ -194,10 +243,19 @@ $('input').blur(function (e) {
     }
     else {
         var arr = parseFormula(input);
-        var arrEq = multiplyDivide(arr);
+        if (arr == null)
+            return;
 
-        var value = null;
-        if (value !== null)
+        var arrMd = multiplyDivide(arr);
+        if (arrMd.length === 1)
+            value = arrMd[0];
+        else
+            value = addSubtract(arrMd);
+
+        if (!isNaN(value)) {
             dictValue[$(this).data('index')] = value;
+            $(this).val(value);
+        }
     }
+    console.log(dictValue);
 });
