@@ -201,7 +201,7 @@ function multiplyDivide(arr) {
                 num = arr[i] / arr[i + 2];
             arrEq.push(num);
             i += 2;
-            justPush == true;
+            justPush = true;
         }
     }
 
@@ -214,12 +214,12 @@ function multiplyDivide(arr) {
 function addSubtract(arr) {
     var answer;
 
-    for (var i = 0; i < arr.length; i+=2) {
+    for (var i = 0, answer = Number(arr[i]); i < arr.length -1; i+=2) {
         if (arr[i + 1] === '+') {
-            answer = arr[i] + arr[i + 2];
+            answer = answer + Number(arr[i + 2]);
         }
         else {
-            answer = arr[i] - arr[i + 2];
+            answer = answer - Number(arr[i + 2]);
         }
     }
 
@@ -227,10 +227,12 @@ function addSubtract(arr) {
 }
 
 /* Get and save input */
-$('input').blur(function (e) {
-    /* Save input string, number or formula if cell isn't blank after losing focus */
-    if ($(this).val() === '')
+$('input').change(function (e) {
+    if ($(this).val() === '') {
+        if ($(this).data('index') in dictInput)
+            delete dictInput[$(this).data('index')];
         return;
+    }
 
     var input = $(this).val();
     dictInput[$(this).data('index')] = input;
