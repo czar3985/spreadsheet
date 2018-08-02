@@ -2,7 +2,7 @@
 
 Online spreadsheet
 
-[Website](spreadsheetonline.azurewebsites.net)
+[Website](http://spreadsheetonline.azurewebsites.net)
 
 ## Features
 1. 100 x 100 grid
