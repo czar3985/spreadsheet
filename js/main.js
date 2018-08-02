@@ -94,6 +94,89 @@ $('input').keydown(function (e) {
         $(this).toggleClass('underline');
 });
 
+function parseFormula(input) {
+    /* Check if valid formula */
+    if (input.charAt(0) !== '=')
+        return null;
+
+    input = input.slice(1);/* Remove '=' */
+    if (input === '')
+        return null
+
+    /* Check for operators */
+    if (!(input.includes('*')) &&
+        !(input.includes('/')) &&
+        !(input.includes('+')) &&
+        !(input.includes('-'))) {
+        /* TODO: Add checking for valid numbers e.g., "= 6 " */
+        return null;
+    }
+
+    /* Consider MDAS rule */
+    /* TODO: Add parentheses support in formulas */
+    var arr = input.split(/([\*\/+-])/);
+    if (arr.length === 0)
+        return null
+
+    var arrClean = [];
+    var isPrevNum = false;
+    var isInvalid = false;
+    var arrCount = arr.length;
+
+    /* Remove empty array items */
+    arr.forEach(function (item) {
+        if (item !== "")
+            arrClean.push(item);
+    });
+
+    arrClean.forEach(function (item, index) {
+        /* Trim white spaces around, but white space inside--> NaN */
+        arrClean[index] = item.trim();
+
+        if ((arrClean[index] !== '*') &&
+            (arrClean[index] !== '/') &&
+            (arrClean[index] !== '+') &&
+            (arrClean[index] !== '-') &&
+            isNaN(arrClean[index])) {
+            isInvalid = true;
+            return;
+        }
+
+        /* Check order of number and operator */
+        /* TODO: Support for unary operators + and - */
+        if (!isPrevNum) { /* Expect number here */
+            if ((arrClean[index] !== '*') &&
+                (arrClean[index] !== '/') &&
+                (arrClean[index] !== '+') &&
+                (arrClean[index] !== '-'))
+                isPrevNum = true;
+            else {
+                isInvalid = true;
+                return;
+            }
+        }
+        else { /* Expect operator here */
+            if ((arrClean[index] !== '*') &&
+                (arrClean[index] !== '/') &&
+                (arrClean[index] !== '+') &&
+                (arrClean[index] !== '-')) {
+                isInvalid = true;
+                return;
+            }
+            else if (index === arrCount - 1) {
+                isInvalid = true;
+                return;
+            }
+            else
+                isPrevNum = false;
+        }
+    });
+    if (isInvalid)
+        return null;
+
+    return arrClean;
+}
+
 /* Get and save input */
 $('input').blur(function (e) {
     /* Save input string, number or formula if cell isn't blank after losing focus */
@@ -110,30 +193,11 @@ $('input').blur(function (e) {
         dictValue[$(this).data('index')] = input;
     }
     else {
-        /* Check if valid formula */
-        if (input.charAt(0) === '=') {
-            input = input.slice(1)/*.replace(/\s+/g, '')*/;/* Remove '=' */
-            if (input === '')
-                return
+        var arr = parseFormula(input);
+        var arrEq = multiplyDivide(arr);
 
-            /* Check for operators */
-            if (!(input.includes('*')) &&
-                !(input.includes('/')) &&
-                !(input.includes('+')) &&
-                !(input.includes('-'))) {
-                /* TODO: Add checking for valid numbers e.g., "= 6 " */
-                return;
-            }
-
-            /* Consider MDAS rule */
-            /* TODO: Add parentheses support */
-            var arrMd = input.split(/[\*\/]/);
-            if (arrMd.length === 0)
-                return
-
-            var arrAs = [];
-
-            console.log(arr);
-        }
+        var value = null;
+        if (value !== null)
+            dictValue[$(this).data('index')] = value;
     }
 });
