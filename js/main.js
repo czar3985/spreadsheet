@@ -126,9 +126,12 @@ $('input').blur(function (e) {
             }
 
             /* Consider MDAS rule */
-            var arr = input.split(/\*\//);
-            if (arr.length === 0)
+            /* TODO: Add parentheses support */
+            var arrMd = input.split(/[\*\/]/);
+            if (arrMd.length === 0)
                 return
+
+            var arrAs = [];
 
             console.log(arr);
         }
