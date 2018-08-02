@@ -54,6 +54,7 @@ for (i = 1; i <= numRows; i++) {
 $('.row-numbers').append(fragment);
 
 /* Add cells */
+$('.worksheet').append('<table class="cells"></table>');
 fragment = document.createDocumentFragment();
 i = 1;
 for (var row = 1; row <= numRows; row++) {

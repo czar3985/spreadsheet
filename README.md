@@ -19,3 +19,4 @@ Coding and testing ongoing for many features
 
 - Parentheses support for formulas
 - Unary operators + and -
+- Support for keyboard presses for navigating the grid
