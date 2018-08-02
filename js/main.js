@@ -227,7 +227,7 @@ function addSubtract(arr) {
 }
 
 /* Get and save input */
-$('input').change(function (e) {
+$('input').change(function () {
     if ($(this).val() === '') {
         if ($(this).data('index') in dictInput)
             delete dictInput[$(this).data('index')];
@@ -259,5 +259,29 @@ $('input').change(function (e) {
             $(this).val(value);
         }
     }
-    console.log(dictValue);
+});
+
+$('input').focus(function () {
+    if ($(this).data('index') in dictInput)
+        $('.cell-input').val(dictInput[$(this).data('index')]);
+    else
+        $('.cell-input').val('');
+
+    /* Convert index to column and row number */
+    var row = Math.ceil($(this).data('index') / numCols);
+
+    var col = $(this).data('index') % numCols;
+    if (col === 0)
+        col = 100;
+    var colString = '';
+
+    if (Math.ceil(col / 26) > 1)
+        colString += String.fromCharCode(Math.ceil(col / 26) + 63);
+
+    if ((col % 26) === 0)
+        colString += String.fromCharCode(90);
+    else
+        colString += String.fromCharCode((col % 26) + 64);
+
+    $('.cell-selected').val(colString + row.toString());
 });
