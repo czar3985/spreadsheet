@@ -16,6 +16,12 @@ Online spreadsheet
 
 Coding and testing ongoing for many features
 
+Ex:
+
+= A1 + A2
+
+= SUM(A1:A3)
+
 ## Issues
 
 - Parentheses support for formulas

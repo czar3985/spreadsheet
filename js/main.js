@@ -113,9 +113,10 @@ function parseFormula(input) {
         !(input.includes('+')) &&
         !(input.includes('-'))) {
 
-        /* Add checking for valid numbers e.g., "= 6 " */
-        if (isNaN(input.trim()))
+        /* Add checking for valid numbers, or cell number e.g., "= 6 " or "=A1"*/
+        if (isNaN(input.trim())) {
             return null;
+        }
         else
             return [input.trim()];
     }
