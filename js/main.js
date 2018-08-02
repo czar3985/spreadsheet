@@ -54,20 +54,23 @@ for (i = 1; i <= numRows; i++) {
 $('.row-numbers').append(fragment);
 
 /* Add cells */
-$('.worksheet').append('<table class="cells"></table>');
-fragment = document.createDocumentFragment();
-i = 1;
-for (var row = 1; row <= numRows; row++) {
+function addTheCells() {
+    $('.worksheet').append('<table class="cells"></table>');
+    var fragment = document.createDocumentFragment();
+    var i = 1;
+    for (var row = 1; row <= numRows; row++) {
 
-    var newRow = document.createElement('tr');
+        var newRow = document.createElement('tr');
 
-    for (var col = 1; col <= numCols; col++) {
-        $(newRow).append('<td><input type="text" data-index="' + i.toString() + '"></td>');
-        i++;
+        for (var col = 1; col <= numCols; col++) {
+            $(newRow).append('<td><input type="text" data-index="' + i.toString() + '"></td>');
+            i++;
+        }
+        $(fragment).append(newRow);
     }
-    $(fragment).append(newRow);
+    $('.cells').append(fragment);
 }
-$('.cells').append(fragment);
+addTheCells();
 
 /*
  *
@@ -83,16 +86,16 @@ $(window).scroll(function () {
 });
 
 /* Cell formatting */
-$('input').keydown(function (e) {
+$(".worksheet").on("keydown", 'tr', function (e) {
 
     if ((e.key === 'b') && (e.ctrlKey === true))
-        $(this).toggleClass('bold');
+        $(e.target).toggleClass('bold');
 
     else if ((e.key === 'i') && (e.ctrlKey === true))
-        $(this).toggleClass('italic');
+        $(e.target).toggleClass('italic');
 
     else if ((e.key === 'u') && (e.ctrlKey === true))
-        $(this).toggleClass('underline');
+        $(e.target).toggleClass('underline');
 });
 
 function parseFormula(input) {
@@ -228,21 +231,21 @@ function addSubtract(arr) {
 }
 
 /* Get and save input */
-$('input').change(function () {
-    if ($(this).val() === '') {
-        if ($(this).data('index') in dictInput)
-            delete dictInput[$(this).data('index')];
+$(".worksheet").on("change", 'input', function (e) {
+    if ($(e.target).val() === '') {
+        if ($(e.target).data('index') in dictInput)
+            delete dictInput[$(e.target).data('index')];
         return;
     }
 
-    var input = $(this).val();
-    dictInput[$(this).data('index')] = input;
+    var input = $(e.target).val();
+    dictInput[$(e.target).data('index')] = input;
 
     /* Check the input */
     if (!isNaN(input)) {
         /* Value is a number -> Save */
         /* TODO: Comma-separated numbers are not yet recognized as numbers */
-        dictValue[$(this).data('index')] = input;
+        dictValue[$(e.target).data('index')] = input;
     }
     else {
         var arr = parseFormula(input);
@@ -256,27 +259,27 @@ $('input').change(function () {
             value = addSubtract(arrMd);
 
         if (!isNaN(value)) {
-            dictValue[$(this).data('index')] = value;
-            $(this).val(value);
+            dictValue[$(e.target).data('index')] = value;
+            $(e.target).val(value);
         }
     }
 });
 
-$('input').focus(function () {
-    if ($(this).data('index') in dictInput)
+$(".worksheet").on("focus", 'input', function (e) {
+    if ($(e.target).data('index') in dictInput)
         $('.cell-input').val(dictInput[$(this).data('index')]);
     else
         $('.cell-input').val('');
 
-    if (isNaN($(this).data('index'))) {
+    if (isNaN($(e.target).data('index'))) {
         $('.cell-selected').val('');
         return;
     }
 
     /* Convert index to column and row number */
-    var row = Math.ceil($(this).data('index') / numCols);
+    var row = Math.ceil($(e.target).data('index') / numCols);
 
-    var col = $(this).data('index') % numCols;
+    var col = $(e.target).data('index') % numCols;
     if (col === 0)
         col = 100;
     var colString = '';
@@ -290,4 +293,30 @@ $('input').focus(function () {
         colString += String.fromCharCode((col % 26) + 64);
 
     $('.cell-selected').val(colString + row.toString());
+});
+
+$('.button-refresh').click(function () {
+    /* Delete cells */
+    $(".cells").detach();
+
+    /* Add the cells */
+    addTheCells();
+
+    /* Put data back from the dictionary */
+    for (var key in dictInput) {
+        var row = Math.ceil(key / numCols);
+        var col = (key % 100) === 0 ? 100 : (key % 100);
+        var target = $('.cells tr:nth-child('
+            + row.toString()
+            + ') td:nth-child('
+            + col.toString()
+            + ') input');
+
+        if (key in dictValue)
+            $(target).val(dictValue[key]);
+        else
+            $(target).val(dictInput[key]);
+    }
+
+    alert('Spreadsheet has been refreshed.');
 });

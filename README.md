@@ -10,6 +10,7 @@ Online spreadsheet
 
     Ex. =4/3*3-2+1
 3. Ctrl B - Bold, Ctrl I = Italics, Ctrl U - Underline
+4. Refresh button
 
 ## To Dos
 
@@ -20,3 +21,4 @@ Coding and testing ongoing for many features
 - Parentheses support for formulas
 - Unary operators + and -
 - Support for keyboard presses for navigating the grid
+- Lost formatting after a refresh
