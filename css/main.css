@@ -141,6 +141,7 @@ tr {
   top: 112px;
   position: fixed;
   z-index: 1;
+  background-color: white;
 }
 
 input {
