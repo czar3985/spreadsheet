@@ -112,8 +112,12 @@ function parseFormula(input) {
         !(input.includes('/')) &&
         !(input.includes('+')) &&
         !(input.includes('-'))) {
-        /* TODO: Add checking for valid numbers e.g., "= 6 " */
-        return null;
+
+        /* Add checking for valid numbers e.g., "= 6 " */
+        if (isNaN(input.trim()))
+            return null;
+        else
+            return [input.trim()];
     }
 
     /* Consider MDAS rule */
@@ -232,12 +236,14 @@ function addSubtract(arr) {
 
 /* Get and save input */
 $(".worksheet").on("change", 'input', function (e) {
+    /* Empty string value */
     if ($(e.target).val() === '') {
         if ($(e.target).data('index') in dictInput)
             delete dictInput[$(e.target).data('index')];
         return;
     }
 
+    /* Save the string or formula */
     var input = $(e.target).val();
     dictInput[$(e.target).data('index')] = input;
 
