@@ -267,6 +267,11 @@ $('input').focus(function () {
     else
         $('.cell-input').val('');
 
+    if (isNaN($(this).data('index'))) {
+        $('.cell-selected').val('');
+        return;
+    }
+
     /* Convert index to column and row number */
     var row = Math.ceil($(this).data('index') / numCols);
 
