@@ -122,13 +122,13 @@ $(window).scroll(function () {
 $(".worksheet").on("keydown", 'tr', function (e) {
 
     // Apply CSS style on Ctrl-B, Ctrl-I and Ctrl-U
-    // ISSUE: Implementation to be changed to accommodate refresh feature
     if ((e.key === 'b') && (e.ctrlKey === true))
         $(e.target).toggleClass('bold');
 
     else if ((e.key === 'i') && (e.ctrlKey === true))
         $(e.target).toggleClass('italic');
 
+    // ISSUE: Ctrl-U also opens the source file in a new tab
     else if ((e.key === 'u') && (e.ctrlKey === true))
         $(e.target).toggleClass('underline');
 });
@@ -383,10 +383,10 @@ $('.worksheet').on('focus', 'input', function (e) {
 */
 $('.button-refresh').click(function () {
     // Delete cells
-    $('.cells').detach();
+    var cells = $('.cells').detach();
 
     // Put the grid back
-    addTheCells();
+    cells.appendTo($('.worksheet'));
 
     // Put data back from the dictionary
     for (var key in dictInput) {

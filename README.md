@@ -27,4 +27,3 @@ Ex:
 - Parentheses support for formulas
 - Unary operators + and -
 - Support for keyboard presses for navigating the grid
-- Lost formatting after a refresh
