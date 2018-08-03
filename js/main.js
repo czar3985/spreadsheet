@@ -135,6 +135,62 @@ $(".worksheet").on("keydown", 'tr', function (e) {
 
 
 /*
+ * GET VALUE FROM CELL INDICATOR Ex. A1
+*/
+function parseAndGetCellValue(input) {
+    var rowName = '';
+    var colName = '';
+    var rowNum = 0;
+    var colNum = 0;
+    var letterNum;
+    var targetElement;
+    var i;
+
+    // Separate the column from the row part in the cell ID
+    for (i = 1; i <= input.length; i++) {
+        if ((i < 65 || i > 90) && (colName = ''))
+            // Invalid column code
+            return null;
+
+        if (i >= 65 && i <= 90)
+            // Valid column code character
+            colName += input[i];
+        else {
+            rowName = input.slice(i - 1);
+            break;
+        }
+    }
+
+    // Check if row number is valid
+    rowNum = Number(rowName);
+    if ((rowNum <= 0) || !Number.isInteger(rowNum) || rowNum > numRows)
+        return null;
+
+    // Check if column header is valid
+    for (i = colName.length - 1; i >= 0; i--) {
+        letterNum = colName[i].charCodeAt() - 64;
+
+        colNum += ((26 ** i) * (letterNum - 1)) + (26 ** i);
+    }
+
+    if (colNum > numCols)
+        // Invalid if exceeding grid size
+        return null;
+
+    targetElement = $('.cells tr:nth-child('
+        + rowName
+        + ') td:nth-child('
+        + colNum.toString()
+        + ') input');
+
+    if ($(targetElement).data('index') in dictValue)
+        return dictValue[$(targetElement).data('index')];
+    else
+        return 0;
+}
+
+
+/*
  * RETURN OPERANDS AND OPERATORS FROM A FORMULA
 */
 function parseFormula(input) {
