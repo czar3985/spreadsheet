@@ -309,7 +309,7 @@ function parseFormula(input) {
 function multiplyDivide(arr) {
     var arrEq = [];
     var i;
-    var justPush = false;
+    var justPush = true;
 
     // No multiplication or division needed if operators are not present
     var found = arr.find(function (element) {
