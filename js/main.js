@@ -142,21 +142,23 @@ function parseAndGetCellValue(input) {
     var colName = '';
     var rowNum = 0;
     var colNum = 0;
+    var asciiCode;
     var letterNum;
     var targetElement;
     var i;
 
     // Separate the column from the row part in the cell ID
-    for (i = 1; i <= input.length; i++) {
-        if ((i < 65 || i > 90) && (colName = ''))
+    for (i = 0; i < input.length; i++) {
+        asciiCode = input[i].charCodeAt();
+        if ((asciiCode < 65 || asciiCode > 90) && (colName = ''))
             // Invalid column code
             return null;
 
-        if (i >= 65 && i <= 90)
+        if (asciiCode >= 65 && asciiCode <= 90)
             // Valid column code character
             colName += input[i];
         else {
-            rowName = input.slice(i - 1);
+            rowName = input.slice(i);
             break;
         }
     }
@@ -198,6 +200,7 @@ function parseFormula(input) {
     var arrClean = [];
     var isPrevNum = false;
     var isInvalid = false;
+    var value;
     var arrCount;
 
     // Valid formulas start with '='
@@ -214,13 +217,13 @@ function parseFormula(input) {
         !(input.includes('+')) &&
         !(input.includes('-'))) {
 
-        // Add checking for valid numbers, or cell number e.g., = 6
-        // TODO: Add checking for =A1
-        if (isNaN(input.trim())) {
-            return null;
-        }
-        else
+        // Checking for valid numbers, or cell number e.g., = 6
+        if (!isNaN(input.trim()))
             return [input.trim()];
+
+        // Checking for =A1
+        value = parseAndGetCellValue(input);
+        return ((value !== null) ? [value] : null);
     }
 
     // Parse into tokens

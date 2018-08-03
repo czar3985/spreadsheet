@@ -6,7 +6,15 @@ Online spreadsheet
 
 ## Features
 1. 100 x 100 grid
-2. Multiplication, division, addition, subtraction
+2. Save number and string input
+
+    Ex. 
+    - This is an input
+    - 95
+    - =87
+    - =A1
+        
+3. Multiplication, division, addition, subtraction
 
     Ex. =4/3*3-2+1
 3. Ctrl B - Bold, Ctrl I = Italics, Ctrl U - Underline
@@ -25,5 +33,6 @@ Ex:
 ## Limitations
 
 - Parentheses support for formulas
+- Numbers with comma are treated as string
 - Unary operators + and -
 - Support for keyboard presses for navigating the grid
