@@ -150,13 +150,13 @@ function parseAndGetCellValue(input) {
     // Separate the column from the row part in the cell ID
     for (i = 0; i < input.length; i++) {
         asciiCode = input[i].charCodeAt();
-        if ((asciiCode < 65 || asciiCode > 90) && (colName = ''))
+        if ((asciiCode < 65 || asciiCode > 90) && (colName === ''))
             // Invalid column code
             return null;
 
         if (asciiCode >= 65 && asciiCode <= 90)
             // Valid column code character
-            colName += input[i];
+            colName = colName + input[i];
         else {
             rowName = input.slice(i);
             break;
@@ -243,13 +243,24 @@ function parseFormula(input) {
         // Trim white spaces around, but with white space inside, it's NaN
         arrClean[index] = item.trim();
 
+        // Check if operands are valid
         if ((arrClean[index] !== '*') &&
             (arrClean[index] !== '/') &&
             (arrClean[index] !== '+') &&
-            (arrClean[index] !== '-') &&
-            isNaN(arrClean[index])) {
-            isInvalid = true;
-            return;
+            (arrClean[index] !== '-')) {
+
+            if (isNaN(arrClean[index])) {
+                // If not a number, check if valid cell indicator
+                // Replace cell indicator with number if valid
+                value = parseAndGetCellValue(arrClean[index]);
+                if (value === null) {
+                    isInvalid = true;
+                    return;
+                }
+                else {
+                    arrClean[index] = value;
+                }
+            }
         }
 
         // Check order of numbers and operators
