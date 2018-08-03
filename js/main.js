@@ -5,72 +5,96 @@
  *
 */
 
-/* Global Objects */
-var dictInput = {}; /* User input per cell */
-var dictValue = {}; /* Calculated value per cell */
+/*
+ * GLOBAL VARIABLES FOR SAVING THE SPREADSHEET DATA
+*/
+var dictInput = {}; // User input per cell
+var dictValue = {}; // Calculated value per cell
 
-/* ISSUE: numCols can only go up to 702 */
+
+/*
+ * GRID DIMENSIONS
+*/
 const numRows = 100;
-const numCols = 100;
+const numCols = 100; // ISSUE: numCols can only go up to 702
 
-/* Add column headers */
-/* ISSUE: Only goes up to ZZ */
-var code1 = 0;
-var code2 = 65;
-var i, node;
-/* Use a fragment to avoid numerous reflows */
-var fragment = document.createDocumentFragment();
-for (i = 1; i <= numCols; i++) {
-    if (code1 === 0) { /* Single letter columns */
-        node = $('<th>' + String.fromCharCode(code2) + '</th>');
-        if (code2 === 90) { /* At Z, move to AA */
-            code1 = 65;
-            code2 = 65;
+
+/*
+ * COLUMN AND ROW SETUP
+*/
+$(function () {
+    var code1 = 0;
+    var code2 = 65; // ISSUE: Only goes up to ZZ
+    var i, node;
+    // Use a fragment to avoid numerous reflows
+    var fragment = document.createDocumentFragment();
+
+    // ADD COLUMN HEADERS
+    // Construct each column header
+    for (i = 1; i <= numCols; i++) {
+        if (code1 === 0) {      // Single letter columns
+            node = $('<th>' + String.fromCharCode(code2) + '</th>');
+            if (code2 === 90) { // At Z, move to AA
+                code1 = 65;
+                code2 = 65;
+            }
+            else {
+                code2++;
+            }
         }
-        else {
-            code2++;
+        else {                  // Double letter columns
+            node = $('<th>' + String.fromCharCode(code1) + String.fromCharCode(code2) + '</th>');
+            if (code2 === 90) { // e.g. At AZ, move to BA
+                code1++;
+                code2 = 65;
+            }
+            else {
+                code2++;
+            }
         }
+        $(fragment).append(node);
     }
-    else { /* Double letter columns */
-        node = $('<th>' + String.fromCharCode(code1) + String.fromCharCode(code2) + '</th>');
-        if (code2 === 90) { /* e.g. At AZ, move to BA */
-            code1++;
-            code2 = 65;
-        }
-        else {
-            code2++;
-        }
+    // Add all the column headers to the DOM as a group
+    $('.column-header-row').append(fragment);
+
+    // ADD ROW NUMBERS
+    fragment = document.createDocumentFragment();
+    for (i = 1; i <= numRows; i++) {
+        node = $('<tr><td class="row-width">' + i.toString() + '</td></tr>');
+        $(fragment).append(node);
     }
-    $(fragment).append(node);
-}
-$('.column-header-row').append(fragment);
+    $('.row-numbers').append(fragment);
+})
 
-/* Add row numbers */
-fragment = document.createDocumentFragment();
-for (i = 1; i <= numRows; i++) {
-    node = $('<tr><td class="row-width">' + i.toString() + '</td></tr>');
-    $(fragment).append(node);
-}
-$('.row-numbers').append(fragment);
 
-/* Add cells */
+/*
+ * GRID SETUP
+*/
 function addTheCells() {
-    $('.worksheet').append('<table class="cells"></table>');
     var fragment = document.createDocumentFragment();
     var i = 1;
-    for (var row = 1; row <= numRows; row++) {
 
+    $('.worksheet').append('<table class="cells"></table>');
+
+    // Add each row to the document fragment
+    for (var row = 1; row <= numRows; row++) {
         var newRow = document.createElement('tr');
 
+        // Add each column to the current row
         for (var col = 1; col <= numCols; col++) {
+            // data-index is the cell indicator. Column and Row can be derived from it.
             $(newRow).append('<td><input type="text" data-index="' + i.toString() + '"></td>');
             i++;
         }
         $(fragment).append(newRow);
     }
+
+    // Add all the grid to the DOM
     $('.cells').append(fragment);
 }
+
 addTheCells();
+
 
 /*
  *
@@ -79,15 +103,26 @@ addTheCells();
  *
 */
 
-/* Allow the column header and row number column to scroll accordingly */
+/*
+ * ALLOW THE COLUMN HEADER AND ROW NUMBERS TO SCROLL ACCORDINGLY
+*/
 $(window).scroll(function () {
+    // Column headers are fixed vertically but scrolls horizontally
     $('.column-header').css('left', (-window.pageXOffset).toString() + 'px');
+
+    // Row indicators are fixed horizontally but scrolls vertically
+    // ISSUE: Maintenance problem if the site header is changed because of hardcoded top padding
     $('.row-number-section').css('top', (112 - window.pageYOffset).toString() + 'px');
 });
 
-/* Cell formatting */
+
+/*
+ * CELL FORMATTING (BOLD, ITALIC, UNDERLINE)
+*/
 $(".worksheet").on("keydown", 'tr', function (e) {
 
+    // Apply CSS style on Ctrl-B, Ctrl-I and Ctrl-U
+    // ISSUE: Implementation to be changed to accommodate refresh feature
     if ((e.key === 'b') && (e.ctrlKey === true))
         $(e.target).toggleClass('bold');
 
@@ -98,22 +133,33 @@ $(".worksheet").on("keydown", 'tr', function (e) {
         $(e.target).toggleClass('underline');
 });
 
+
+/*
+ * RETURN OPERANDS AND OPERATORS FROM A FORMULA
+*/
 function parseFormula(input) {
-    /* Check if valid formula */
+    var arr = [];
+    var arrClean = [];
+    var isPrevNum = false;
+    var isInvalid = false;
+    var arrCount;
+
+    // Valid formulas start with '='
     if (input.charAt(0) !== '=')
         return null;
 
-    input = input.slice(1);/* Remove '=' */
+    input = input.slice(1); // Remove '='
     if (input === '')
-        return null
+        return null;
 
-    /* Check for operators */
+    // Valid formulas have these operators
     if (!(input.includes('*')) &&
         !(input.includes('/')) &&
         !(input.includes('+')) &&
         !(input.includes('-'))) {
 
-        /* Add checking for valid numbers, or cell number e.g., "= 6 " or "=A1"*/
+        // Add checking for valid numbers, or cell number e.g., = 6
+        // TODO: Add checking for =A1
         if (isNaN(input.trim())) {
             return null;
         }
@@ -121,25 +167,21 @@ function parseFormula(input) {
             return [input.trim()];
     }
 
-    /* Consider MDAS rule */
-    /* TODO: Add parentheses support in formulas */
-    var arr = input.split(/([\*\/+-])/);
+    // Parse into tokens
+    // TODO: Add parentheses support
+    arr = input.split(/([\*\/+-])/);
     if (arr.length === 0)
         return null
 
-    var arrClean = [];
-    var isPrevNum = false;
-    var isInvalid = false;
-    var arrCount = arr.length;
-
-    /* Remove empty array items */
+    // Remove empty array items
+    arrCount = arr.length;
     arr.forEach(function (item) {
         if (item !== "")
             arrClean.push(item);
     });
 
     arrClean.forEach(function (item, index) {
-        /* Trim white spaces around, but white space inside--> NaN */
+        // Trim white spaces around, but with white space inside, it's NaN
         arrClean[index] = item.trim();
 
         if ((arrClean[index] !== '*') &&
@@ -151,9 +193,10 @@ function parseFormula(input) {
             return;
         }
 
-        /* Check order of number and operator */
-        /* TODO: Support for unary operators + and - */
-        if (!isPrevNum) { /* Expect number here */
+        // Check order of numbers and operators
+        // Should start and end with number, no 2 numbers or 2 operators together
+        // TODO: Support for unary operators + and -
+        if (!isPrevNum) { // Expect number here
             if ((arrClean[index] !== '*') &&
                 (arrClean[index] !== '/') &&
                 (arrClean[index] !== '+') &&
@@ -164,7 +207,7 @@ function parseFormula(input) {
                 return;
             }
         }
-        else { /* Expect operator here */
+        else { // Expect operator here
             if ((arrClean[index] !== '*') &&
                 (arrClean[index] !== '/') &&
                 (arrClean[index] !== '+') &&
@@ -180,17 +223,25 @@ function parseFormula(input) {
                 isPrevNum = false;
         }
     });
+
+    // Invalid formulas are treated as strings
     if (isInvalid)
         return null;
 
+    // Array of tokens (numbers and operators in correct order)
     return arrClean;
 }
 
+
+/*
+ * MULTIPLICATION AND DIVISION OPERATIONS IN THE FORMULA
+*/
 function multiplyDivide(arr) {
     var arrEq = [];
     var i;
     var justPush = false;
 
+    // No multiplication or division needed if operators are not present
     var found = arr.find(function (element) {
         return (element === '*' || element === '/');
     });
@@ -199,10 +250,13 @@ function multiplyDivide(arr) {
 
     for (i = 0; i < arr.length; i++) {
         if ((arr[i + 1] !== '*') && (arr[i + 1] !== '/') && justPush) {
+            // Multiplication and division not to be performed
+            // Continue traversing the array of tokens
             arrEq.push(arr[i]);
             continue;
         }
         else {
+            // Do computations. Product or quotient goes in the array
             var num;
             if (arr[i + 1] === '*')
                 num = arr[i] * arr[i + 2];
@@ -214,15 +268,22 @@ function multiplyDivide(arr) {
         }
     }
 
+    // Call recursively until all multiplications and divisions
+    // have been performed
     if (arrEq.Length !== 1)
         return multiplyDivide(arrEq);
     else
         return arrEq;
 }
 
+
+/*
+ * ADDITION AND SUBTRACTION OPERATIONS IN THE FORMULA
+*/
 function addSubtract(arr) {
     var answer;
 
+    // Traverse the array of tokens and get the final answer
     for (var i = 0, answer = Number(arr[i]); i < arr.length -1; i+=2) {
         if (arr[i + 1] === '+') {
             answer = answer + Number(arr[i + 2]);
@@ -235,36 +296,42 @@ function addSubtract(arr) {
     return answer;
 }
 
-/* Get and save input */
-$(".worksheet").on("change", 'input', function (e) {
-    /* Empty string value */
-    if ($(e.target).val() === '') {
+
+/*
+ * GET AND SAVE AN INPUT
+*/
+$('.worksheet').on('change', 'input', function (e) {
+    var input = $(e.target).val();
+
+    // Empty string value
+    if (input === '') {
         if ($(e.target).data('index') in dictInput)
             delete dictInput[$(e.target).data('index')];
         return;
     }
 
-    /* Save the string or formula */
-    var input = $(e.target).val();
+    // Save the string or formula
     dictInput[$(e.target).data('index')] = input;
 
-    /* Check the input */
+    // Check the input
     if (!isNaN(input)) {
-        /* Value is a number -> Save */
-        /* TODO: Comma-separated numbers are not yet recognized as numbers */
+        // Value is a number -> Save
+        // TODO: Comma-separated numbers are not yet recognized as numbers
         dictValue[$(e.target).data('index')] = input;
     }
     else {
         var arr = parseFormula(input);
-        if (arr == null)
+        if (arr == null) // Input is a string and not a formula
             return;
 
+        // Multiplication and Division has higher precedence
         var arrMd = multiplyDivide(arr);
         if (arrMd.length === 1)
             value = arrMd[0];
         else
             value = addSubtract(arrMd);
 
+        // Computation is done. Save to global variable
         if (!isNaN(value)) {
             dictValue[$(e.target).data('index')] = value;
             $(e.target).val(value);
@@ -272,25 +339,33 @@ $(".worksheet").on("change", 'input', function (e) {
     }
 });
 
-$(".worksheet").on("focus", 'input', function (e) {
+
+/*
+ * UPDATE THE TEXT FIELDS IN THE HEADER
+*/
+$('.worksheet').on('focus', 'input', function (e) {
+    // If there is an entry previously, show that string
     if ($(e.target).data('index') in dictInput)
         $('.cell-input').val(dictInput[$(this).data('index')]);
     else
         $('.cell-input').val('');
 
+    // Fix for NaN appearing in the cell field on click
     if (isNaN($(e.target).data('index'))) {
         $('.cell-selected').val('');
         return;
     }
 
-    /* Convert index to column and row number */
+    // Convert index to column and row number
     var row = Math.ceil($(e.target).data('index') / numCols);
 
+    // ISSUE: Only supports double-letter columns
     var col = $(e.target).data('index') % numCols;
     if (col === 0)
         col = 100;
     var colString = '';
 
+    // ASCII Code of A=65,...,Z=90
     if (Math.ceil(col / 26) > 1)
         colString += String.fromCharCode(Math.ceil(col / 26) + 63);
 
@@ -302,14 +377,18 @@ $(".worksheet").on("focus", 'input', function (e) {
     $('.cell-selected').val(colString + row.toString());
 });
 
-$('.button-refresh').click(function () {
-    /* Delete cells */
-    $(".cells").detach();
 
-    /* Add the cells */
+/*
+ * REPAINT THE GRID AND PUT THE DATA BACK
+*/
+$('.button-refresh').click(function () {
+    // Delete cells
+    $('.cells').detach();
+
+    // Put the grid back
     addTheCells();
 
-    /* Put data back from the dictionary */
+    // Put data back from the dictionary
     for (var key in dictInput) {
         var row = Math.ceil(key / numCols);
         var col = (key % 100) === 0 ? 100 : (key % 100);
@@ -319,11 +398,14 @@ $('.button-refresh').click(function () {
             + col.toString()
             + ') input');
 
+        // Cell value is in dictValue if there is a computed value
+        // or in dictInput if it is a string
         if (key in dictValue)
             $(target).val(dictValue[key]);
         else
             $(target).val(dictInput[key]);
     }
 
+    // It looks like nothing happened without an alert
     alert('Spreadsheet has been refreshed.');
 });

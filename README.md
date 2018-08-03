@@ -22,7 +22,7 @@ Ex:
 
 = SUM(A1:A3)
 
-## Issues
+## Limitations
 
 - Parentheses support for formulas
 - Unary operators + and -
