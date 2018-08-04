@@ -123,7 +123,7 @@ $(window).scroll(function () {
 /*
  * CELL FORMATTING (BOLD, ITALIC, UNDERLINE)
 */
-$(".worksheet").on("keydown", 'tr', function (e) {
+$('.worksheet').on('keydown', 'tr', function (e) {
 
     // Apply CSS style on Ctrl-B, Ctrl-I and Ctrl-U
     if ((e.key === 'b') && (e.ctrlKey === true))
@@ -316,7 +316,7 @@ function parseFormula(input) {
     // Remove empty array items
     arrCount = arr.length;
     arr.forEach(function (item) {
-        if (item !== "")
+        if (item !== '')
             tokens.push(item);
     });
 
@@ -504,7 +504,7 @@ $('.worksheet').on('change', 'input', function (e) {
     listDependencies.forEach(function (dependency) {
         if (dependency[0].data('index') == $(e.target).data('index')) {
             triggerFromAnotherInput = true;
-            $(dependency[1]).trigger("change");
+            $(dependency[1]).trigger('change');
         }
     });
 });
@@ -519,12 +519,6 @@ $('.worksheet').on('focus', 'input', function (e) {
         $('.cell-input').val(dictInput[$(this).data('index')]);
     else
         $('.cell-input').val('');
-
-    // Fix for NaN appearing in the cell field on click
-    if (isNaN($(e.target).data('index'))) {
-        $('.cell-selected').val('');
-        return;
-    }
 
     // Convert index to column and row number
     var row = Math.ceil($(e.target).data('index') / numCols);
