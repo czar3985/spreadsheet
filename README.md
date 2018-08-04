@@ -33,4 +33,5 @@ Coding and testing ongoing for many features
 - Unary operators + and -
 - Support for keyboard presses for navigating the grid
 - Data does not persist when browser window is closed
-- No listeners yet when an operation uses a cell with a value that changed
+- Some listeners not yet implemented for when an operation refers to
+a cell that changed

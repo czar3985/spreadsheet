@@ -10,6 +10,10 @@
 */
 var dictInput = {}; // User input per cell
 var dictValue = {}; // Calculated value per cell
+var listDependencies = []; // Elements dependent on other elements' values
+var elementToListenTo;
+var elementToChange;
+var triggerFromAnotherInput = false;
 
 
 /*
@@ -185,6 +189,8 @@ function parseAndGetCellValue(input) {
         + colNum.toString()
         + ') input');
 
+    elementToListenTo = targetElement;
+
     if ($(targetElement).data('index') in dictValue)
         return dictValue[$(targetElement).data('index')];
     else
@@ -237,6 +243,7 @@ function getTokensFromSumRange(range) {
         }
         return formula;
     }
+    // TODO:
     // Case 2: Range is in the same row
     // Case 3: Range encompasses several rows and columns
 }
@@ -288,9 +295,16 @@ function parseFormula(input) {
         if (!isNaN(input.trim()))
             return [input.trim()];
 
-        // FORMULA TYPE #2: =6
+        // FORMULA TYPE #3: =A1
         value = parseAndGetCellValue(input);
-        return ((value !== null) ? [value] : null);
+        if (value !== null) {
+            // Add to list of dependencies
+            listDependencies.push([elementToListenTo, elementToChange]);
+            return [value];
+        }
+        else {
+            return null;
+        }
     }
 
     // Parse into tokens
@@ -442,6 +456,15 @@ function addSubtract(arr) {
 $('.worksheet').on('change', 'input', function (e) {
     var input = $(e.target).val();
 
+    // Note for dependency
+    elementToChange = $(e.target);
+    // Recalculate if related element changed
+    if (triggerFromAnotherInput) {
+        if ($(e.target).data('index') in dictInput)
+            input = dictInput[$(e.target).data('index')];
+        triggerFromAnotherInput = false;
+    }
+
     // Empty string value
     if (input === '') {
         if ($(e.target).data('index') in dictInput)
@@ -476,6 +499,14 @@ $('.worksheet').on('change', 'input', function (e) {
             $(e.target).val(value);
         }
     }
+
+    // Check affected elements
+    listDependencies.forEach(function (dependency) {
+        if (dependency[0].data('index') == $(e.target).data('index')) {
+            triggerFromAnotherInput = true;
+            $(dependency[1]).trigger("change");
+        }
+    });
 });
 
 
