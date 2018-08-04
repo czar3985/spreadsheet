@@ -197,7 +197,7 @@ function parseAndGetCellValue(input) {
 */
 function parseFormula(input) {
     var arr = [];
-    var arrClean = [];
+    var tokens = [];
     var isPrevNum = false;
     var isInvalid = false;
     var value;
@@ -211,17 +211,30 @@ function parseFormula(input) {
     if (input === '')
         return null;
 
+    /*
+     *  DIFFERENT FORMULA TYPES
+     *  1. =SUM(A1:A2)
+     *  2. =6
+     *  3. =A1
+     *  4. =A1*A3-A5+A6/A4
+     *  5. =1+2/3*4-5
+     */
+    // FORMULA TYPE #1: =SUM(A1:A2)
+    if (input.includes('SUM')) {
+
+    }
     // Valid formulas have these operators
     if (!(input.includes('*')) &&
         !(input.includes('/')) &&
         !(input.includes('+')) &&
         !(input.includes('-'))) {
 
+        // FORMULA TYPE #2: =6
         // Checking for valid numbers, or cell number e.g., = 6
         if (!isNaN(input.trim()))
             return [input.trim()];
 
-        // Checking for =A1
+        // FORMULA TYPE #2: =6
         value = parseAndGetCellValue(input);
         return ((value !== null) ? [value] : null);
     }
@@ -236,41 +249,43 @@ function parseFormula(input) {
     arrCount = arr.length;
     arr.forEach(function (item) {
         if (item !== "")
-            arrClean.push(item);
+            tokens.push(item);
     });
 
-    arrClean.forEach(function (item, index) {
+    // FORMULA TYPE #4: =A1*A3-A5+A6/A4
+    tokens.forEach(function (item, index) {
         // Trim white spaces around, but with white space inside, it's NaN
-        arrClean[index] = item.trim();
+        tokens[index] = item.trim();
 
         // Check if operands are valid
-        if ((arrClean[index] !== '*') &&
-            (arrClean[index] !== '/') &&
-            (arrClean[index] !== '+') &&
-            (arrClean[index] !== '-')) {
+        if ((tokens[index] !== '*') &&
+            (tokens[index] !== '/') &&
+            (tokens[index] !== '+') &&
+            (tokens[index] !== '-')) {
 
-            if (isNaN(arrClean[index])) {
-                // If not a number, check if valid cell indicator
+            if (isNaN(tokens[index])) {
+                // If not a number, check if valid cell indicator: E.g. A1
                 // Replace cell indicator with number if valid
-                value = parseAndGetCellValue(arrClean[index]);
+                value = parseAndGetCellValue(tokens[index]);
                 if (value === null) {
                     isInvalid = true;
                     return;
                 }
                 else {
-                    arrClean[index] = value;
+                    tokens[index] = value;
                 }
             }
         }
 
+        // FORMULA TYPE #5: =1+2/3*4-5
         // Check order of numbers and operators
         // Should start and end with number, no 2 numbers or 2 operators together
         // TODO: Support for unary operators + and -
         if (!isPrevNum) { // Expect number here
-            if ((arrClean[index] !== '*') &&
-                (arrClean[index] !== '/') &&
-                (arrClean[index] !== '+') &&
-                (arrClean[index] !== '-'))
+            if ((tokens[index] !== '*') &&
+                (tokens[index] !== '/') &&
+                (tokens[index] !== '+') &&
+                (tokens[index] !== '-'))
                 isPrevNum = true;
             else {
                 isInvalid = true;
@@ -278,10 +293,10 @@ function parseFormula(input) {
             }
         }
         else { // Expect operator here
-            if ((arrClean[index] !== '*') &&
-                (arrClean[index] !== '/') &&
-                (arrClean[index] !== '+') &&
-                (arrClean[index] !== '-')) {
+            if ((tokens[index] !== '*') &&
+                (tokens[index] !== '/') &&
+                (tokens[index] !== '+') &&
+                (tokens[index] !== '-')) {
                 isInvalid = true;
                 return;
             }
@@ -299,7 +314,7 @@ function parseFormula(input) {
         return null;
 
     // Array of tokens (numbers and operators in correct order)
-    return arrClean;
+    return tokens;
 }
 
 
