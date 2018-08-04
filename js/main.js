@@ -193,6 +193,56 @@ function parseAndGetCellValue(input) {
 
 
 /*
+ * GET OPERANDS TO ADD FROM SUM RANGE
+*/
+function getTokensFromSumRange(range) {
+    var i;
+    var firstCode = '';
+    var secondCode = '';
+    var firstCol = '';
+    var secondCol = '';
+    var firstRow = '';
+    var secondRow = '';
+    var formula = '';
+
+    // Get the 2 cell indicators: e.g. A1 and B2
+    for (i = 0; i < range.length && range[i] !== ':'; i++)
+        firstCode += range[i];
+    secondCode = range.slice(i + 1);
+
+    // In first cell, get the col and row: e.g, A and 1
+    for (i = 0; i < firstCode.length && isNaN(firstCode[i]); i++)
+        firstCol += firstCode[i];
+    firstRow = firstCode.slice(i);
+
+    // In second cell, get the col and row: e.g, B and 2
+    for (i = 0; i < secondCode.length && isNaN(secondCode[i]); i++)
+        secondCol += secondCode[i];
+    secondRow = secondCode.slice(i);
+
+    // Case 1: Range is in the same column
+    if (firstCol == secondCol) {
+        var firstNumInSeries = Number(firstRow);
+        var lastNumInSeries = Number(secondRow);
+
+        if (firstNumInSeries > lastNumInSeries) {
+            firstNumInSeries = Number(secondRow);
+            lastNumInSeries = Number(firstRow);
+        }
+
+        for (i = firstNumInSeries; i <= lastNumInSeries; i++) {
+            formula += firstCol + i.toString();
+            if (i != lastNumInSeries)
+                formula += '+';
+        }
+        return formula;
+    }
+    // Case 2: Range is in the same row
+    // Case 3: Range encompasses several rows and columns
+}
+
+
+/*
  * RETURN OPERANDS AND OPERATORS FROM A FORMULA
 */
 function parseFormula(input) {
@@ -220,9 +270,13 @@ function parseFormula(input) {
      *  5. =1+2/3*4-5
      */
     // FORMULA TYPE #1: =SUM(A1:A2)
-    if (input.includes('SUM')) {
+    if ((input.slice(0, 4) === 'SUM(') &&
+        (input.charAt(input.length - 1) === ')') &&
+        (input.includes(':'))) {
 
+        input = getTokensFromSumRange(input.slice(4, input.length-1));
     }
+
     // Valid formulas have these operators
     if (!(input.includes('*')) &&
         !(input.includes('/')) &&

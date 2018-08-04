@@ -19,16 +19,12 @@ Online spreadsheet
     Ex. =4/3*3-2+1
 3. Ctrl B - Bold, Ctrl I = Italics, Ctrl U - Underline
 4. Refresh button
+6. Operations on cells: =A1+A2/A3*A4
+7. Sum of range: =SUM(A1:A4)
 
 ## To Dos
 
 Coding and testing ongoing for many features
-
-Ex:
-
-= A1 + A2
-
-= SUM(A1:A3)
 
 ## Limitations
 
@@ -36,3 +32,5 @@ Ex:
 - Numbers with comma are treated as string
 - Unary operators + and -
 - Support for keyboard presses for navigating the grid
+- Data does not persist when browser window is closed
+- No listeners yet when an operation uses a cell with a value that changed
