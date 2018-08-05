@@ -10,8 +10,13 @@
 */
 var dictInput = {}; // User input per cell
 var dictValue = {}; // Calculated value per cell
-var listDependencies = []; // Elements dependent on other elements' values
-var elementToListenTo;
+
+
+/*
+ * FOR LISTENING TO CHANGES ON RELATED CELLS
+*/
+var listDependencies = [];
+var elementsToRemember = [];
 var elementToChange;
 var triggerFromAnotherInput = false;
 
@@ -189,7 +194,7 @@ function parseAndGetCellValue(input) {
         + colNum.toString()
         + ') input');
 
-    elementToListenTo = targetElement;
+    elementsToRemember.push(targetElement);
 
     if ($(targetElement).data('index') in dictValue)
         return dictValue[$(targetElement).data('index')];
@@ -250,6 +255,23 @@ function getTokensFromSumRange(range) {
 
 
 /*
+ * MANAGE THE LIST OF DEPENDENCIES
+*/
+function setDependencies() {
+    // Delete existing dependencies
+    for (var i = listDependencies.length - 1; i >= 0; i--) {
+        if ($(listDependencies[1]).data('index') == $(elementToChange).data('index'))
+            listDependencies.splice(i, 1);
+    }
+
+    // Add dependencies [Element to listen to for changes, Element to change]
+    elementsToRemember.forEach(function (element) {
+        listDependencies.push([element, elementToChange]);
+    });
+}
+
+
+/*
  * RETURN OPERANDS AND OPERATORS FROM A FORMULA
 */
 function parseFormula(input) {
@@ -297,14 +319,7 @@ function parseFormula(input) {
 
         // FORMULA TYPE #3: =A1
         value = parseAndGetCellValue(input);
-        if (value !== null) {
-            // Add to list of dependencies
-            listDependencies.push([elementToListenTo, elementToChange]);
-            return [value];
-        }
-        else {
-            return null;
-        }
+        return value !== null ? [value] : null;
     }
 
     // Parse into tokens
@@ -453,38 +468,45 @@ function addSubtract(arr) {
 /*
  * GET AND SAVE AN INPUT
 */
-$('.worksheet').on('change', 'input', function (e) {
-    var input = $(e.target).val();
+$('input').change(function (e) {
+    var input = $(this).val();
+    var elementId = $(this).data('index');
 
     // Note for dependency
-    elementToChange = $(e.target);
+    elementToChange = $(this);
+
     // Recalculate if related element changed
     if (triggerFromAnotherInput) {
-        if ($(e.target).data('index') in dictInput)
-            input = dictInput[$(e.target).data('index')];
+        if (elementId in dictInput)
+            input = dictInput[elementId];
         triggerFromAnotherInput = false;
     }
 
     // Empty string value
     if (input === '') {
-        if ($(e.target).data('index') in dictInput)
-            delete dictInput[$(e.target).data('index')];
+        if (elementId in dictInput)
+            delete dictInput[elementId];
+        elementsToRemember = [];
+        setDependencies();
         return;
     }
 
     // Save the string or formula
-    dictInput[$(e.target).data('index')] = input;
+    dictInput[elementId] = input;
 
     // Check the input
     if (!isNaN(input)) {
         // Value is a number -> Save
         // TODO: Comma-separated numbers are not yet recognized as numbers
-        dictValue[$(e.target).data('index')] = input;
+        dictValue[elementId] = input;
     }
     else {
         var arr = parseFormula(input);
-        if (arr == null) // Input is a string and not a formula
+        if (arr == null) {// Input is a string and not a formula
+            elementsToRemember = [];
+            setDependencies();
             return;
+        }
 
         // Multiplication and Division has higher precedence
         var arrMd = multiplyDivide(arr);
@@ -495,16 +517,18 @@ $('.worksheet').on('change', 'input', function (e) {
 
         // Computation is done. Save to global variable
         if (!isNaN(value)) {
-            dictValue[$(e.target).data('index')] = value;
-            $(e.target).val(value);
+            dictValue[elementId] = value;
+            $(this).val(value);
         }
+
+        setDependencies();
     }
 
     // Check affected elements
-    listDependencies.forEach(function (dependency) {
-        if (dependency[0].data('index') == $(e.target).data('index')) {
+    listDependencies.forEach(function(dependency) {
+        if ($(dependency[0]).data('index') == elementId) {
             triggerFromAnotherInput = true;
-            $(dependency[1]).trigger('change');
+            $(dependency[1]).triggerHandler('change');
         }
     });
 });
@@ -513,18 +537,18 @@ $('.worksheet').on('change', 'input', function (e) {
 /*
  * UPDATE THE TEXT FIELDS IN THE HEADER
 */
-$('.worksheet').on('focus', 'input', function (e) {
+$('input').focus(function (e) {
     // If there is an entry previously, show that string
-    if ($(e.target).data('index') in dictInput)
+    if ($(this).data('index') in dictInput)
         $('.cell-input').val(dictInput[$(this).data('index')]);
     else
         $('.cell-input').val('');
 
     // Convert index to column and row number
-    var row = Math.ceil($(e.target).data('index') / numCols);
+    var row = Math.ceil($(this).data('index') / numCols);
 
     // ISSUE: Only supports double-letter columns
-    var col = $(e.target).data('index') % numCols;
+    var col = $(this).data('index') % numCols;
     if (col === 0)
         col = 100;
     var colString = '';
