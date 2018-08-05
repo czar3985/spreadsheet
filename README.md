@@ -33,4 +33,3 @@ Coding and testing ongoing for many features
 - Unary operators + and -
 - Support for keyboard presses for navigating the grid
 - Data does not persist when browser window is closed
-- Some performance issue when an operation refers to cells that changed values

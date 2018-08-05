@@ -268,6 +268,8 @@ function setDependencies() {
     elementsToRemember.forEach(function (element) {
         listDependencies.push([element, elementToChange]);
     });
+
+    elementsToRemember = [];
 }
 
 
