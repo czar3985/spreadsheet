@@ -474,21 +474,20 @@ $('input').change(function (e) {
     var input = $(this).val();
     var elementId = $(this).data('index');
 
-    // Note for dependency
+    // Initialize for dependencies
     elementToChange = $(this);
+    elementsToRemember = [];
 
     // Recalculate if related element changed
     if (triggerFromAnotherInput) {
         if (elementId in dictInput)
             input = dictInput[elementId];
-        triggerFromAnotherInput = false;
     }
 
     // Empty string value
     if (input === '') {
         if (elementId in dictInput)
             delete dictInput[elementId];
-        elementsToRemember = [];
         setDependencies();
         return;
     }
@@ -505,7 +504,6 @@ $('input').change(function (e) {
     else {
         var arr = parseFormula(input);
         if (arr == null) {// Input is a string and not a formula
-            elementsToRemember = [];
             setDependencies();
             return;
         }
@@ -523,7 +521,12 @@ $('input').change(function (e) {
             $(this).val(value);
         }
 
-        setDependencies();
+        // List elements that affect another if there is a new formula
+        if (!triggerFromAnotherInput)
+            setDependencies();
+        else
+            // Reset when recalculation is done
+            triggerFromAnotherInput = false;
     }
 
     // Check affected elements
