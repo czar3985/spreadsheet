@@ -33,3 +33,4 @@ Coding and testing ongoing for many features
 - Unary operators + and -
 - Support for keyboard presses for navigating the grid
 - Data does not persist when browser window is closed
+- No checking yet for circular references
