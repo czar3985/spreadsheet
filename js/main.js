@@ -521,12 +521,20 @@ $('input').change(function (e) {
             $(this).val(value);
         }
 
+<<<<<<< HEAD
         // List elements that affect another if there is a new formula
         if (!triggerFromAnotherInput)
             setDependencies();
         else
             // Reset when recalculation is done
             triggerFromAnotherInput = false;
+||||||| merged common ancestors
+        setDependencies();
+=======
+        // If recalculating only, there was no change in formula
+        if (!triggerFromAnotherInput)
+            setDependencies();
+>>>>>>> 788bdd943577670c2114bdb6f6252b596e51cb0f
     }
 
     // Check affected elements
