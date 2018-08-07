@@ -155,6 +155,7 @@ function parseAndGetCellValue(input) {
     var letterNum;
     var targetElement;
     var i;
+    var charPointer;
 
     // Separate the column from the row part in the cell ID
     for (i = 0; i < input.length; i++) {
@@ -178,8 +179,11 @@ function parseAndGetCellValue(input) {
         return null;
 
     // Check if column header is valid
-    for (i = colName.length - 1; i >= 0; i--) {
-        letterNum = colName[i].charCodeAt() - 64;
+    for (i = colName.length - 1, charPointer = 0;
+        i >= 0;
+        i-- , charPointer++) {
+
+        letterNum = colName[charPointer].charCodeAt() - 64;
 
         colNum += ((26 ** i) * (letterNum - 1)) + (26 ** i);
     }
