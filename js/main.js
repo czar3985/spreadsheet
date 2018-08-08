@@ -144,6 +144,21 @@ $('.worksheet').on('keydown', 'tr', function (e) {
 
 
 /*
+ * CHECK FOR CIRCULAR REFERENCES
+*/
+function checkNoCircularReference(targetElement) {
+    if ($(elementToChange).data('index') == $(targetElement).data('index'))
+        return false; /* Ex. A1 = A1 */
+
+    listDependencies.forEach(function (dependency) {
+        // TODO: Other cases
+    });
+
+    return true;
+}
+
+
+/*
  * GET VALUE FROM CELL INDICATOR Ex. A1
 */
 function parseAndGetCellValue(input) {
@@ -197,6 +212,9 @@ function parseAndGetCellValue(input) {
         + ') td:nth-child('
         + colNum.toString()
         + ') input');
+
+    if (!checkNoCircularReference(targetElement))
+        return null;
 
     elementsToRemember.push(targetElement);
 
