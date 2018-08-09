@@ -301,7 +301,7 @@ function getTokensFromSumRange(range) {
 function setDependencies() {
     // Delete existing dependencies
     for (var i = listDependencies.length - 1; i >= 0; i--) {
-        if ($(listDependencies[1]).data('index') == $(elementToChange).data('index'))
+        if ($(listDependencies[i])[1].data('index') == $(elementToChange).data('index'))
             listDependencies.splice(i, 1);
     }
 
