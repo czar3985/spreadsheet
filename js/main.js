@@ -146,15 +146,34 @@ $('.worksheet').on('keydown', 'tr', function (e) {
 /*
  * CHECK FOR CIRCULAR REFERENCES
 */
-function checkNoCircularReference(targetElement) {
-    if ($(elementToChange).data('index') == $(targetElement).data('index'))
+function checkNoCircularReference(affectedElement, targetElement) {
+    /* targetElement has an effect on affectedElement: targetElement --> affectedElement.
+     * listDependencies is an array of element pairs where dependency[0] --> dependency[1].
+     * Function checks whether there is a case when there is a circular reference:
+     * targetElement--> (dependency[0]==affectedElement)--> (dependency[1]==targetElement)
+     * Ex. A1-->A1   or   A1-->B1-->A1   or   A1-->B1-->C1-->D1-->E1-->A1
+     */
+    var isValid = true;
+
+    if ($(affectedElement).data('index') == $(targetElement).data('index')) {
         return false; /* Ex. A1 = A1 */
+    }
 
     listDependencies.forEach(function (dependency) {
-        // TODO: Other cases
+        if ($(affectedElement).data('index') == $(dependency[0]).data('index')) {
+            if ($(targetElement).data('index') == $(dependency[1]).data('index')) {
+                isValid = false;
+                return;
+            }
+            else {
+                isValid = checkNoCircularReference(dependency[1], targetElement);
+                if (!isValid)
+                    return;
+            }
+        }
     });
 
-    return true;
+    return isValid;
 }
 
 
@@ -213,7 +232,7 @@ function parseAndGetCellValue(input) {
         + colNum.toString()
         + ') input');
 
-    if (!checkNoCircularReference(targetElement))
+    if (!checkNoCircularReference(elementToChange, targetElement))
         return null;
 
     elementsToRemember.push(targetElement);
