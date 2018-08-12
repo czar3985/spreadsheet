@@ -11,13 +11,18 @@ $('.cells').append(fragment)}
 addTheCells();$(window).scroll(function(){$('.column-header').css('left',(-window.pageXOffset).toString()+'px');$('.row-number-section').css('top',(112-window.pageYOffset).toString()+'px')});$('.worksheet').on('keydown','tr',function(e){if((e.key==='b')&&(e.ctrlKey===!0))
 $(e.target).toggleClass('bold');else if((e.key==='i')&&(e.ctrlKey===!0))
 $(e.target).toggleClass('italic');else if((e.key==='u')&&(e.ctrlKey===!0))
-$(e.target).toggleClass('underline')});function parseAndGetCellValue(input){var rowName='';var colName='';var rowNum=0;var colNum=0;var asciiCode;var letterNum;var targetElement;var i;for(i=0;i<input.length;i++){asciiCode=input[i].charCodeAt();if((asciiCode<65||asciiCode>90)&&(colName===''))
+$(e.target).toggleClass('underline')});function checkNoCircularReference(affectedElement,targetElement){var isValid=!0;if($(affectedElement).data('index')==$(targetElement).data('index')){return!1}
+listDependencies.forEach(function(dependency){if($(affectedElement).data('index')==$(dependency[0]).data('index')){if($(targetElement).data('index')==$(dependency[1]).data('index')){isValid=!1;return}
+else{isValid=checkNoCircularReference(dependency[1],targetElement);if(!isValid)
+return}}});return isValid}
+function parseAndGetCellValue(input){var rowName='';var colName='';var rowNum=0;var colNum=0;var asciiCode;var letterNum;var targetElement;var i;var charPointer;for(i=0;i<input.length;i++){asciiCode=input[i].charCodeAt();if((asciiCode<65||asciiCode>90)&&(colName===''))
 return null;if(asciiCode>=65&&asciiCode<=90)
 colName=colName+input[i];else{rowName=input.slice(i);break}}
 rowNum=Number(rowName);if((rowNum<=0)||!Number.isInteger(rowNum)||rowNum>numRows)
-return null;for(i=colName.length-1;i>=0;i--){letterNum=colName[i].charCodeAt()-64;colNum+=((26**i)*(letterNum-1))+(26**i)}
+return null;for(i=colName.length-1,charPointer=0;i>=0;i--,charPointer++){letterNum=colName[charPointer].charCodeAt()-64;colNum+=((26**i)*(letterNum-1))+(26**i)}
 if(colNum>numCols)
-return null;targetElement=$('.cells tr:nth-child('+rowName+') td:nth-child('+colNum.toString()+') input');elementsToRemember.push(targetElement);if($(targetElement).data('index')in dictValue)
+return null;targetElement=$('.cells tr:nth-child('+rowName+') td:nth-child('+colNum.toString()+') input');if(!checkNoCircularReference(elementToChange,targetElement))
+return null;elementsToRemember.push(targetElement);if($(targetElement).data('index')in dictValue)
 return dictValue[$(targetElement).data('index')];else return 0}
 function getTokensFromSumRange(range){var i;var firstCode='';var secondCode='';var firstCol='';var secondCol='';var firstRow='';var secondRow='';var formula='';for(i=0;i<range.length&&range[i]!==':';i++)
 firstCode+=range[i];secondCode=range.slice(i+1);for(i=0;i<firstCode.length&&isNaN(firstCode[i]);i++)
@@ -26,7 +31,7 @@ secondCol+=secondCode[i];secondRow=secondCode.slice(i);if(firstCol==secondCol){v
 for(i=firstNumInSeries;i<=lastNumInSeries;i++){formula+=firstCol+i.toString();if(i!=lastNumInSeries)
 formula+='+'}
 return formula}}
-function setDependencies(){for(var i=listDependencies.length-1;i>=0;i--){if($(listDependencies[1]).data('index')==$(elementToChange).data('index'))
+function setDependencies(){for(var i=listDependencies.length-1;i>=0;i--){if($(listDependencies[i])[1].data('index')==$(elementToChange).data('index'))
 listDependencies.splice(i,1)}
 elementsToRemember.forEach(function(element){listDependencies.push([element,elementToChange])});elementsToRemember=[]}
 function parseFormula(input){var arr=[];var tokens=[];var isPrevNum=!1;var isInvalid=!1;var value;var arrCount;if(input.charAt(0)!=='=')
@@ -54,16 +59,20 @@ return multiplyDivide(arrEq);else return arrEq}
 function addSubtract(arr){var answer;for(var i=0,answer=Number(arr[i]);i<arr.length-1;i+=2){if(arr[i+1]==='+'){answer=answer+Number(arr[i+2])}
 else{answer=answer-Number(arr[i+2])}}
 return answer}
-$('input').change(function(e){var input=$(this).val();var elementId=$(this).data('index');elementToChange=$(this);if(triggerFromAnotherInput){if(elementId in dictInput)
-input=dictInput[elementId];triggerFromAnotherInput=!1}
+function recomputeAffectedElements(elementId){listDependencies.forEach(function(dependency){if($(dependency[0]).data('index')==elementId){triggerFromAnotherInput=!0;$(dependency[1]).triggerHandler('change')}})}
+$('input').change(function(e){var input=$(this).val();var elementId=$(this).data('index');elementToChange=$(this);elementsToRemember=[];if(triggerFromAnotherInput){if(elementId in dictInput)
+input=dictInput[elementId]}
 if(input===''){if(elementId in dictInput)
-delete dictInput[elementId];elementsToRemember=[];setDependencies();return}
-dictInput[elementId]=input;if(!isNaN(input)){dictValue[elementId]=input}
-else{var arr=parseFormula(input);if(arr==null){elementsToRemember=[];setDependencies();return}
+delete dictInput[elementId];if(elementId in dictValue)
+delete dictValue[elementId];setDependencies();recomputeAffectedElements(elementId);return}
+dictInput[elementId]=input;if(!isNaN(input)){dictValue[elementId]=input;setDependencies()}
+else{var arr=parseFormula(input);if(arr==null){if(elementId in dictValue)
+delete dictValue[elementId];setDependencies();recomputeAffectedElements(elementId);return}
 var arrMd=multiplyDivide(arr);if(arrMd.length===1)
 value=arrMd[0];else value=addSubtract(arrMd);if(!isNaN(value)){dictValue[elementId]=value;$(this).val(value)}
-setDependencies()}
-listDependencies.forEach(function(dependency){if($(dependency[0]).data('index')==elementId){triggerFromAnotherInput=!0;$(dependency[1]).triggerHandler('change')}})});$('input').focus(function(e){if($(this).data('index')in dictInput)
+if(!triggerFromAnotherInput)
+setDependencies();else triggerFromAnotherInput=!1}
+recomputeAffectedElements(elementId)});$('input').focus(function(e){if($(this).data('index')in dictInput)
 $('.cell-input').val(dictInput[$(this).data('index')]);else $('.cell-input').val('');var row=Math.ceil($(this).data('index')/numCols);var col=$(this).data('index')%numCols;if(col===0)
 col=100;var colString='';if(Math.ceil(col/26)>1)
 colString+=String.fromCharCode(Math.ceil(col/26)+63);if((col%26)===0)

@@ -509,6 +509,19 @@ function addSubtract(arr) {
 
 
 /*
+ * CHECK DEPENDENCIES AND RECOMPUTE CELLS IF AFFECTED BY THE CHANGE
+*/
+function recomputeAffectedElements(elementId) {
+    listDependencies.forEach(function (dependency) {
+        if ($(dependency[0]).data('index') == elementId) {
+            triggerFromAnotherInput = true;
+            $(dependency[1]).triggerHandler('change');
+        }
+    });
+}
+
+
+/*
  * GET AND SAVE AN INPUT
 */
 $('input').change(function (e) {
@@ -529,7 +542,10 @@ $('input').change(function (e) {
     if (input === '') {
         if (elementId in dictInput)
             delete dictInput[elementId];
+        if (elementId in dictValue)
+            delete dictValue[elementId];
         setDependencies();
+        recomputeAffectedElements(elementId);
         return;
     }
 
@@ -541,11 +557,15 @@ $('input').change(function (e) {
         // Value is a number -> Save
         // TODO: Comma-separated numbers are not yet recognized as numbers
         dictValue[elementId] = input;
+        setDependencies();
     }
     else {
         var arr = parseFormula(input);
         if (arr == null) {// Input is a string and not a formula
+            if (elementId in dictValue)
+                delete dictValue[elementId];
             setDependencies();
+            recomputeAffectedElements(elementId);
             return;
         }
 
@@ -571,12 +591,7 @@ $('input').change(function (e) {
     }
 
     // Check affected elements
-    listDependencies.forEach(function(dependency) {
-        if ($(dependency[0]).data('index') == elementId) {
-            triggerFromAnotherInput = true;
-            $(dependency[1]).triggerHandler('change');
-        }
-    });
+    recomputeAffectedElements(elementId);
 });
 
 
